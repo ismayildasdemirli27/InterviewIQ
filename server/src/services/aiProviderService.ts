@@ -56,6 +56,29 @@ export const getAiProviderStatus = async (): Promise<AiProviderStatus> => {
 };
 
 /**
+ * Pre-warm the local model in GPU VRAM permanently (keep_alive: -1)
+ */
+export const warmupLocalModel = async (): Promise<void> => {
+  try {
+    console.log(`[AI Provider] Pre-warming GPU model (${OLLAMA_MODEL}) into VRAM...`);
+    await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        prompt: "ready",
+        stream: false,
+        keep_alive: -1, // Keep resident in GPU VRAM indefinitely
+        options: { num_predict: 1, num_ctx: 2048 },
+      }),
+    });
+    console.log(`[AI Provider] GPU Model (${OLLAMA_MODEL}) successfully pre-warmed in VRAM!`);
+  } catch (err: any) {
+    console.warn(`[AI Provider] Could not pre-warm model: ${err.message}`);
+  }
+};
+
+/**
  * Query Local Ollama LLM via standard API with JSON format
  */
 const queryLocalLlm = async (
@@ -65,7 +88,7 @@ const queryLocalLlm = async (
   const model = options?.model || OLLAMA_MODEL;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 75000); // 75s timeout for local inference cold-start
+  const timeoutId = setTimeout(() => controller.abort(), 18000); // 18s fast timeout
 
   try {
     const res = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
@@ -78,10 +101,13 @@ const queryLocalLlm = async (
         model,
         prompt,
         stream: false,
+        keep_alive: -1, // Never unload from GPU memory
         format: options?.responseMimeType === "application/json" ? "json" : undefined,
         options: {
           temperature: options?.temperature ?? 0.2,
-          num_predict: options?.maxOutputTokens ?? 1200,
+          num_predict: options?.maxOutputTokens ?? 450,
+          num_ctx: 2048,
+          num_thread: 6,
         },
       }),
     });

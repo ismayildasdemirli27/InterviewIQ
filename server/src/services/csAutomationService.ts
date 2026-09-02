@@ -501,6 +501,32 @@ export const generateCsQuestions = async (
   mode: CsMode = "challenge"
 ): Promise<ICsQuestionItem[]> => {
   const normalizedTopic = topic.trim().toLowerCase();
+  const curated = CURATED_QUESTIONS[normalizedTopic] || CURATED_QUESTIONS["data-structures"] || [];
+
+  // Instant zero-wait response: serve curated high-quality question immediately in <5ms!
+  if (mode !== "exam" && count === 1 && curated.length > 0) {
+    const randomIndex = Math.floor(Math.random() * curated.length);
+    const item = curated[randomIndex];
+    return [{
+      questionId: `cs_instant_${Date.now()}_0`,
+      title: item.title || `${topic} Challenge`,
+      topic: normalizedTopic,
+      subTopic: item.subTopic || subTopic,
+      difficulty: (item.difficulty || difficulty) as CsDifficulty,
+      questionText: item.questionText || "Question text",
+      codeSnippet: item.codeSnippet || "",
+      language: item.language || "javascript",
+      expectedComplexity: item.expectedComplexity || { time: "O(n)", space: "O(1)" },
+      keyConcepts: item.keyConcepts || [topic],
+      testCases: item.testCases || [],
+      hints: item.hints || [
+        "Review the core properties of the topic.",
+        "Think about edge cases like empty inputs or extreme values.",
+        "Construct the optimal algorithm step by step.",
+      ],
+      evaluationStatus: "pending",
+    }];
+  }
 
   const prompt = `
 You are an expert Computer Science Professor and Principal Software Engineer creating high-caliber interview/exam questions for InterviewIQ AI.
@@ -508,16 +534,8 @@ You are an expert Computer Science Professor and Principal Software Engineer cre
 Generate ${count} distinct Computer Science question(s) for the following configuration:
 - Topic: ${topic}
 - Sub-topic: ${subTopic}
-- Difficulty: ${difficulty} (beginner: fundamentals & direct implementation; intermediate: non-trivial algorithms/systems with trade-offs; advanced: complex edge cases, distributed systems, deep internals; senior: architecture, concurrency, optimization)
-- Mode: ${mode} (challenge = single focused coding/algorithmic or core systems question; deep_dive = in-depth conceptual and technical analysis; exam = formal comprehensive interview problem)
-
-CRITICAL REQUIREMENTS:
-- Provide an engaging, clear, and academically sound title.
-- For coding/algorithmic problems, provide clean starter boilerplate code in Javascript or Typescript.
-- For systems/theory questions, provide detailed scenario-based inquiry.
-- Include expected time and space complexity in Big-O notation.
-- Provide 3-5 key concepts.
-- Provide exactly 3 progressive hints (Hint 1: subtle conceptual nudge, Hint 2: algorithmic technique/data structure recommendation, Hint 3: high-level pseudocode/blueprint).
+- Difficulty: ${difficulty}
+- Mode: ${mode}
 
 Return ONLY valid JSON matching this schema:
 [
@@ -534,11 +552,7 @@ Return ONLY valid JSON matching this schema:
       "space": "O(1)"
     },
     "keyConcepts": ["Concept 1", "Concept 2"],
-    "hints": [
-      "Hint 1: Subtle clue...",
-      "Hint 2: Specific data structure...",
-      "Hint 3: Pseudocode flow..."
-    ]
+    "hints": ["Hint 1...", "Hint 2...", "Hint 3..."]
   }
 ]
 `;
@@ -546,7 +560,7 @@ Return ONLY valid JSON matching this schema:
   try {
     const parsed = await generateStructuredJson(prompt, {
       temperature: 0.3,
-      maxOutputTokens: 1600,
+      maxOutputTokens: 600,
       responseMimeType: "application/json",
     });
 
@@ -580,11 +594,11 @@ Return ONLY valid JSON matching this schema:
   }
 
   // Fallback to Curated bank
-  const curated = CURATED_QUESTIONS[normalizedTopic] || CURATED_QUESTIONS["data-structures"] || [];
+  const fallbackBank = CURATED_QUESTIONS[normalizedTopic] || CURATED_QUESTIONS["data-structures"] || [];
   const selected: Partial<ICsQuestionItem>[] = [];
 
   for (let i = 0; i < count; i++) {
-    const fallbackItem = curated[i % curated.length] || {
+    const fallbackItem = fallbackBank[i % fallbackBank.length] || {
       title: `${topic} Core Challenge`,
       topic: normalizedTopic,
       subTopic: subTopic,
@@ -711,7 +725,7 @@ Return ONLY valid JSON matching this schema:
   try {
     const data = await generateStructuredJson(prompt, {
       temperature: 0.2,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 450,
       responseMimeType: "application/json",
     });
 
