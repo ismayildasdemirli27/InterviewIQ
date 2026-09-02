@@ -255,6 +255,13 @@ const LoginPage = () => {
     }
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("guest") === "true" || params.get("demo") === "true" || params.get("auto") === "true") {
+      void handleDemoLogin();
+    }
+  }, []);
+
   const handleSubmit =
     async (
       event:
