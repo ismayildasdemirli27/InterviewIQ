@@ -453,8 +453,9 @@ export const loginController =
 
       res.status(200).json({
         success: true,
+
         message:
-          "Login successful",
+          "Signed in successfully",
 
         data: {
           token,
@@ -465,14 +466,60 @@ export const loginController =
               user.fullName,
             email:
               user.email,
-            role:
-              user.role,
+            role: user.role,
             avatar:
               user.avatar,
             authProvider:
               user.authProvider,
             isEmailVerified:
               user.isEmailVerified,
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const demoLoginController =
+  async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const demoEmail = "guest@interviewiq.ai";
+      let user = await User.findOne({ email: demoEmail });
+
+      if (!user) {
+        user = await User.create({
+          fullName: "Qonaq Tələbə (Guest Demo)",
+          email: demoEmail,
+          password: "GuestPassword123!",
+          role: "user",
+          isEmailVerified: true,
+          authProvider: "local",
+        });
+      } else if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+        await user.save();
+      }
+
+      const token = generateToken(user._id.toString());
+
+      res.status(200).json({
+        success: true,
+        message: "Qonaq girişi uğurla tamamlandı!",
+        data: {
+          token,
+          user: {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            authProvider: user.authProvider,
+            isEmailVerified: user.isEmailVerified,
           },
         },
       });

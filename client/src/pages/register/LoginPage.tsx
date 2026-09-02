@@ -234,6 +234,27 @@ const LoginPage = () => {
     );
   };
 
+  const isGoogleConfigured = Boolean(
+    import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+    !import.meta.env.VITE_GOOGLE_CLIENT_ID.includes("dummy")
+  );
+
+  const handleDemoLogin = async () => {
+    clearMessages();
+    setLoading(true);
+    try {
+      const response = await apiClient.post("/auth/demo-login");
+      completeAuthentication(response.data);
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+        "Demo giriş xətası baş verdi. Zəhmət olmasa yenidən cəhd edin."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit =
     async (
       event:
@@ -630,44 +651,73 @@ const LoginPage = () => {
                   </div>
                 )}
 
-                <div className="google-auth-area">
-                  <div
-                    className="google-button-wrapper"
-                    ref={
-                      googleButtonRef
-                    }
+                <div style={{ marginBottom: "1.25rem" }}>
+                  <button
+                    type="button"
+                    onClick={handleDemoLogin}
+                    disabled={loading || googleLoading}
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem 1.25rem",
+                      background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "10px",
+                      fontWeight: 600,
+                      fontSize: "0.95rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.5rem",
+                      boxShadow: "0 4px 14px rgba(99, 102, 241, 0.35)",
+                      transition: "all 0.2s ease"
+                    }}
                   >
-                    <GoogleLogin
-                      onSuccess={
-                        handleGoogleSuccess
-                      }
-                      onError={() => {
-                        setError(
-                          "Google authentication failed."
-                        );
-                      }}
-                      type="standard"
-                      theme="outline"
-                      size="large"
-                      text="signin_with"
-                      shape="rectangular"
-                      width={
-                        googleButtonWidth
-                      }
-                    />
-                  </div>
-
-                  {googleLoading && (
-                    <span className="google-loading">
-                      Signing in with
-                      Google...
-                    </span>
-                  )}
+                    ⚡ Demo Hesabla Daxil Ol (1-Kliklə Test)
+                  </button>
                 </div>
+
+                {isGoogleConfigured && (
+                  <div className="google-auth-area">
+                    <div
+                      className="google-button-wrapper"
+                      ref={
+                        googleButtonRef
+                      }
+                    >
+                      <GoogleLogin
+                        onSuccess={
+                          handleGoogleSuccess
+                        }
+                        onError={() => {
+                          setError(
+                            "Google authentication failed."
+                          );
+                        }}
+                        type="standard"
+                        theme="outline"
+                        size="large"
+                        text="signin_with"
+                        shape="rectangular"
+                        width={
+                          googleButtonWidth
+                        }
+                      />
+                    </div>
+
+                    {googleLoading && (
+                      <span className="google-loading">
+                        Signing in with
+                        Google...
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="auth-divider">
                   <span>
-                    or continue with email
+                    və ya email ilə daxil olun
                   </span>
                 </div>
 
