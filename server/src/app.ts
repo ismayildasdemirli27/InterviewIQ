@@ -1,3 +1,5 @@
+import path from "node:path";
+import fs from "node:fs";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -20,7 +22,12 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 const allowedOrigins = [
   env.CLIENT_URL,
@@ -34,7 +41,8 @@ app.use(
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app")
+        origin.endsWith(".vercel.app") ||
+        origin.endsWith(".trycloudflare.com")
       ) {
         callback(null, true);
         return;
@@ -125,6 +133,18 @@ app.use(
   "/api/v1",
   bookmarkRoutes
 );
+
+const clientDistPath = path.resolve(__dirname, "../../client/dist");
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api/")) {
+      res.sendFile(path.join(clientDistPath, "index.html"));
+      return;
+    }
+    next();
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);
