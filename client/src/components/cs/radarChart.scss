@@ -1,0 +1,138 @@
+.radar-chart-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+
+  .radar-chart-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    .radar-title-group {
+      h3 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #64748b;
+      }
+    }
+
+    .radar-hover-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ede9fe;
+      border: 1px solid #c7d2fe;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: #4338ca;
+      animation: fadeIn 0.2s ease;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  .radar-svg-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+
+    svg {
+      overflow: visible;
+
+      .grid-ring {
+        transition: all 0.3s;
+      }
+
+      .axis-line {
+        stroke: #cbd5e1;
+      }
+
+      .data-polygon {
+        transition: all 0.5s ease;
+      }
+
+      .data-vertex {
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          fill: #4f46e5;
+          r: 6px;
+        }
+      }
+
+      .radar-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        fill: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &.hovered {
+          fill: #4f46e5;
+          font-weight: 800;
+        }
+      }
+    }
+  }
+
+  .radar-legend-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+    width: 100%;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      &.master .dot {
+        background: #10b981;
+      }
+
+      &.intermediate .dot {
+        background: #6366f1;
+      }
+
+      &.beginner .dot {
+        background: #f59e0b;
+      }
+    }
+  }
+}

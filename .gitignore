@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+.mongo-data/
+.vercel
+.vscode/
+.idea/
+.DS_Store
+*.log
+
