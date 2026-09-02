@@ -134,7 +134,9 @@ app.use(
   bookmarkRoutes
 );
 
-const clientDistPath = path.resolve(__dirname, "../../client/dist");
+const clientDistPath = fs.existsSync(path.resolve(process.cwd(), "client/dist"))
+  ? path.resolve(process.cwd(), "client/dist")
+  : path.resolve(__dirname, "../../client/dist");
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.use((req, res, next) => {

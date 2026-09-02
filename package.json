@@ -1,10 +1,13 @@
 {
   "name": "interviewiq-ai",
   "version": "1.0.0",
-  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run server:dev\" \"npm run client:dev\"",
-    "build": "npm run build --prefix client && npm run build --prefix server",
+    "build": "npm install --prefix client && npm run build --prefix client && npm install --prefix server && npm run build --prefix server",
     "start": "node server/dist/server.js",
     "client:dev": "npm run dev --prefix client",
     "server:dev": "npm run dev --prefix server"
