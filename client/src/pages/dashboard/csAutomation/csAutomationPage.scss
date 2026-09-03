@@ -785,25 +785,6 @@
       color: #ffffff;
       flex-wrap: wrap;
       gap: 14px;
-      width: 100%;
-      box-sizing: border-box;
-
-      @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px 14px;
-        gap: 10px;
-
-        .persona-info-left {
-          width: 100%;
-        }
-
-        .persona-focus-right {
-          width: 100%;
-          justify-content: space-between;
-          background: rgba(255, 255, 255, 0.04);
-        }
-      }
 
       .persona-info-left {
         display: flex;
@@ -920,31 +901,6 @@
       padding: 14px 20px;
       border-radius: 14px;
       border: 1px solid #e2e8f0;
-      flex-wrap: wrap;
-      gap: 12px;
-      width: 100%;
-      box-sizing: border-box;
-
-      @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px 14px;
-        gap: 10px;
-
-        .session-breadcrumbs {
-          flex-wrap: wrap;
-          font-size: 0.8rem;
-          gap: 4px;
-        }
-
-        .session-controls {
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-      }
 
       .session-breadcrumbs {
         display: flex;
@@ -1038,16 +994,8 @@
 
     .workspace-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      grid-template-columns: 1fr 1.15fr;
       gap: 20px;
-      width: 100%;
-      max-width: 100%;
-
-      @media (max-width: 1024px) {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 16px !important;
-      }
 
       .problem-panel {
         display: flex;
@@ -1066,22 +1014,6 @@
             align-items: flex-start;
             gap: 14px;
             margin-bottom: 14px;
-            flex-wrap: wrap;
-
-            @media (max-width: 600px) {
-              flex-direction: column;
-              align-items: flex-start;
-              gap: 10px;
-
-              h2 {
-                font-size: 1.15rem;
-              }
-
-              .problem-header-actions {
-                width: 100%;
-                justify-content: space-between;
-              }
-            }
 
             h2 {
               font-size: 1.35rem;
@@ -1176,15 +1108,12 @@
 
           .expected-meta-row {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             margin-bottom: 18px;
             background: #f8fafc;
             padding: 10px 14px;
             border-radius: 10px;
             border: 1px solid #e2e8f0;
-            flex-wrap: wrap;
-            width: 100%;
-            box-sizing: border-box;
 
             .meta-item {
               display: flex;
@@ -1340,16 +1269,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            width: 100%;
-            box-sizing: border-box;
-
-            @media (max-width: 768px) {
-              flex-direction: column;
-              align-items: stretch;
-              gap: 10px;
-            }
 
             .editor-lang-tag {
               display: flex;
@@ -1363,15 +1282,7 @@
             .editor-controls-right {
               display: flex;
               align-items: center;
-              flex-wrap: wrap;
               gap: 8px;
-
-              @media (max-width: 768px) {
-                flex-direction: column;
-                align-items: stretch;
-                width: 100%;
-                gap: 8px;
-              }
 
               .dictate-lang-selector {
                 display: flex;
@@ -1380,11 +1291,6 @@
                 padding: 2px;
                 border-radius: 6px;
                 gap: 2px;
-
-                @media (max-width: 768px) {
-                  justify-content: center;
-                  width: 100%;
-                }
 
                 .lang-pill {
                   background: transparent;
@@ -1418,12 +1324,6 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
 
-                @media (max-width: 768px) {
-                  justify-content: center;
-                  width: 100%;
-                  padding: 8px 12px;
-                }
-
                 &:hover {
                   background: #fee2e2;
                   color: #dc2626;
@@ -1452,13 +1352,6 @@
                 padding: 3px;
                 border-radius: 8px;
                 gap: 4px;
-                flex-wrap: wrap;
-
-                @media (max-width: 768px) {
-                  display: grid;
-                  grid-template-columns: repeat(2, 1fr);
-                  width: 100%;
-                }
 
                 .editor-tab-btn {
                   display: flex;
@@ -1473,7 +1366,6 @@
                   color: #64748b;
                   cursor: pointer;
                   transition: all 0.2s ease;
-                  justify-content: center;
 
                   &.active {
                     background: #ffffff;
@@ -1763,12 +1655,6 @@
             border-radius: 12px;
             border: 1px solid #e2e8f0;
 
-            @media (max-width: 600px) {
-              grid-template-columns: 1fr;
-              gap: 10px;
-              padding: 12px;
-            }
-
             .complexity-group {
               display: flex;
               flex-direction: column;
@@ -1804,18 +1690,6 @@
             align-items: center;
             margin-top: auto;
             padding-top: 10px;
-            flex-wrap: wrap;
-            gap: 12px;
-
-            @media (max-width: 600px) {
-              flex-direction: column;
-              align-items: stretch;
-
-              .submit-eval-btn {
-                width: 100%;
-                justify-content: center;
-              }
-            }
 
             .footer-left {
               font-size: 0.8rem;
