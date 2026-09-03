@@ -1,6 +1,4 @@
 import {
-  useEffect,
-  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -19,34 +17,12 @@ import {
   FiUser,
 } from "react-icons/fi";
 
-import {
-  GoogleLogin,
-  type CredentialResponse,
-} from "@react-oauth/google";
-
 import axios from "axios";
 
 import apiClient from "../../api/apiClient";
 import { saveAuthSession } from "../../utils/authStorage";
 
 import "./LoginPage.scss";
-
-interface GoogleAuthResponse {
-  data?: {
-    token?: string;
-
-    user?: {
-      id?: string;
-      _id?: string;
-      fullName: string;
-      email: string;
-      role: string;
-      avatar?: string;
-      authProvider?: "local" | "google";
-      isEmailVerified?: boolean;
-    };
-  };
-}
 
 interface RegisterResponse {
   success: boolean;
@@ -60,14 +36,6 @@ interface RegisterResponse {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-
-  const googleButtonRef =
-    useRef<HTMLDivElement>(null);
-
-  const [
-    googleButtonWidth,
-    setGoogleButtonWidth,
-  ] = useState(400);
 
   const [fullName, setFullName] =
     useState("");
@@ -91,83 +59,8 @@ const RegisterPage = () => {
   const [loading, setLoading] =
     useState(false);
 
-  const [
-    googleLoading,
-    setGoogleLoading,
-  ] = useState(false);
-
   const [error, setError] =
     useState("");
-
-  useEffect(() => {
-    const updateGoogleButtonWidth = () => {
-      if (googleButtonRef.current) {
-        setGoogleButtonWidth(
-          Math.min(
-            400,
-            googleButtonRef.current.offsetWidth
-          )
-        );
-      }
-    };
-
-    updateGoogleButtonWidth();
-
-    const resizeObserver =
-      new ResizeObserver(
-        updateGoogleButtonWidth
-      );
-
-    if (googleButtonRef.current) {
-      resizeObserver.observe(
-        googleButtonRef.current
-      );
-    }
-
-    window.addEventListener(
-      "resize",
-      updateGoogleButtonWidth
-    );
-
-    return () => {
-      resizeObserver.disconnect();
-
-      window.removeEventListener(
-        "resize",
-        updateGoogleButtonWidth
-      );
-    };
-  }, []);
-
-  const completeGoogleAuthentication = (
-    responseData: GoogleAuthResponse
-  ) => {
-    const token =
-      responseData.data?.token;
-
-    const user =
-      responseData.data?.user;
-
-    if (!token || !user) {
-      throw new Error(
-        "Authentication response is incomplete."
-      );
-    }
-
-    saveAuthSession(token, user);
-
-    navigate(
-      "/dashboard",
-      {
-        replace: true,
-      }
-    );
-  };
-
-  const isGoogleConfigured = Boolean(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID &&
-    !import.meta.env.VITE_GOOGLE_CLIENT_ID.includes("dummy")
-  );
 
   const handleDemoLogin = async () => {
     setError("");
@@ -296,62 +189,6 @@ const RegisterPage = () => {
     }
   };
 
-  const handleGoogleSuccess =
-    async (
-      credentialResponse:
-        CredentialResponse
-    ) => {
-      if (
-        !credentialResponse.credential
-      ) {
-        setError(
-          "Google did not return a valid credential."
-        );
-
-        return;
-      }
-
-      setError("");
-      setGoogleLoading(true);
-
-      try {
-        const response =
-          await apiClient.post(
-            "/auth/google",
-            {
-              credential:
-                credentialResponse.credential,
-            }
-          );
-
-        completeGoogleAuthentication(
-          response.data
-        );
-      } catch (err) {
-        if (
-          axios.isAxiosError(err)
-        ) {
-          setError(
-            err.response?.data
-              ?.message ||
-              "Google authentication failed."
-          );
-        } else if (
-          err instanceof Error
-        ) {
-          setError(
-            err.message
-          );
-        } else {
-          setError(
-            "Google authentication failed."
-          );
-        }
-      } finally {
-        setGoogleLoading(false);
-      }
-    };
-
   return (
     <div className="auth-page">
       <div className="auth-shell">
@@ -421,7 +258,7 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={handleDemoLogin}
-                disabled={loading || googleLoading}
+                disabled={loading}
                 style={{
                   width: "100%",
                   padding: "0.85rem 1.25rem",
@@ -443,41 +280,6 @@ const RegisterPage = () => {
                 ⚡ Demo Hesabla Daxil Ol (1-Kliklə Test)
               </button>
             </div>
-
-            {isGoogleConfigured && (
-              <div className="google-auth-area">
-                <div
-                  className="google-button-wrapper"
-                  ref={googleButtonRef}
-                >
-                  <GoogleLogin
-                    onSuccess={
-                      handleGoogleSuccess
-                    }
-                    onError={() => {
-                      setError(
-                        "Google authentication failed."
-                      );
-                    }}
-                    type="standard"
-                    theme="outline"
-                    size="large"
-                    text="signup_with"
-                    shape="rectangular"
-                    width={
-                      googleButtonWidth
-                    }
-                  />
-                </div>
-
-                {googleLoading && (
-                  <span className="google-loading">
-                    Creating account
-                    with Google...
-                  </span>
-                )}
-              </div>
-            )}
 
             <div className="auth-divider">
               <span>
@@ -628,10 +430,7 @@ const RegisterPage = () => {
               <button
                 type="submit"
                 className="auth-submit"
-                disabled={
-                  loading ||
-                  googleLoading
-                }
+                disabled={loading}
               >
                 {loading
                   ? "Sending verification code..."

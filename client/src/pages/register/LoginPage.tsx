@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -19,11 +18,6 @@ import {
   FiLock,
   FiMail,
 } from "react-icons/fi";
-
-import {
-  GoogleLogin,
-  type CredentialResponse,
-} from "@react-oauth/google";
 
 import axios from "axios";
 
@@ -59,14 +53,6 @@ type AuthView =
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  const googleButtonRef =
-    useRef<HTMLDivElement>(null);
-
-  const [
-    googleButtonWidth,
-    setGoogleButtonWidth,
-  ] = useState(400);
-
   const [email, setEmail] =
     useState("");
 
@@ -86,11 +72,6 @@ const LoginPage = () => {
   const [
     loading,
     setLoading,
-  ] = useState(false);
-
-  const [
-    googleLoading,
-    setGoogleLoading,
   ] = useState(false);
 
   const [error, setError] =
@@ -151,52 +132,6 @@ const LoginPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const updateGoogleButtonWidth =
-      () => {
-        if (
-          googleButtonRef.current
-        ) {
-          setGoogleButtonWidth(
-            Math.min(
-              400,
-              googleButtonRef.current
-                .offsetWidth
-            )
-          );
-        }
-      };
-
-    updateGoogleButtonWidth();
-
-    const resizeObserver =
-      new ResizeObserver(
-        updateGoogleButtonWidth
-      );
-
-    if (
-      googleButtonRef.current
-    ) {
-      resizeObserver.observe(
-        googleButtonRef.current
-      );
-    }
-
-    window.addEventListener(
-      "resize",
-      updateGoogleButtonWidth
-    );
-
-    return () => {
-      resizeObserver.disconnect();
-
-      window.removeEventListener(
-        "resize",
-        updateGoogleButtonWidth
-      );
-    };
-  }, []);
-
   const clearMessages = () => {
     setError("");
     setSuccess("");
@@ -233,11 +168,6 @@ const LoginPage = () => {
       }
     );
   };
-
-  const isGoogleConfigured = Boolean(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID &&
-    !import.meta.env.VITE_GOOGLE_CLIENT_ID.includes("dummy")
-  );
 
   const handleDemoLogin = async () => {
     clearMessages();
@@ -356,62 +286,6 @@ const LoginPage = () => {
         }
       } finally {
         setLoading(false);
-      }
-    };
-
-  const handleGoogleSuccess =
-    async (
-      credentialResponse:
-        CredentialResponse
-    ) => {
-      if (
-        !credentialResponse.credential
-      ) {
-        setError(
-          "Google did not return a valid credential."
-        );
-
-        return;
-      }
-
-      clearMessages();
-      setGoogleLoading(true);
-
-      try {
-        const response =
-          await apiClient.post(
-            "/auth/google",
-            {
-              credential:
-                credentialResponse.credential,
-            }
-          );
-
-        completeAuthentication(
-          response.data
-        );
-      } catch (err) {
-        if (
-          axios.isAxiosError(err)
-        ) {
-          setError(
-            err.response?.data
-              ?.message ||
-              "Google authentication failed."
-          );
-        } else if (
-          err instanceof Error
-        ) {
-          setError(
-            err.message
-          );
-        } else {
-          setError(
-            "Google authentication failed."
-          );
-        }
-      } finally {
-        setGoogleLoading(false);
       }
     };
 
@@ -662,7 +536,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={handleDemoLogin}
-                    disabled={loading || googleLoading}
+                    disabled={loading}
                     style={{
                       width: "100%",
                       padding: "0.85rem 1.25rem",
@@ -684,43 +558,6 @@ const LoginPage = () => {
                     ⚡ Demo Hesabla Daxil Ol (1-Kliklə Test)
                   </button>
                 </div>
-
-                {isGoogleConfigured && (
-                  <div className="google-auth-area">
-                    <div
-                      className="google-button-wrapper"
-                      ref={
-                        googleButtonRef
-                      }
-                    >
-                      <GoogleLogin
-                        onSuccess={
-                          handleGoogleSuccess
-                        }
-                        onError={() => {
-                          setError(
-                            "Google authentication failed."
-                          );
-                        }}
-                        type="standard"
-                        theme="outline"
-                        size="large"
-                        text="signin_with"
-                        shape="rectangular"
-                        width={
-                          googleButtonWidth
-                        }
-                      />
-                    </div>
-
-                    {googleLoading && (
-                      <span className="google-loading">
-                        Signing in with
-                        Google...
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 <div className="auth-divider">
                   <span>
@@ -852,10 +689,7 @@ const LoginPage = () => {
                   <button
                     type="submit"
                     className="auth-submit"
-                    disabled={
-                      loading ||
-                      googleLoading
-                    }
+                    disabled={loading}
                   >
                     {loading
                       ? "Logging in..."

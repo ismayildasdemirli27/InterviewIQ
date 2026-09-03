@@ -42,7 +42,8 @@ app.use(
         !origin ||
         allowedOrigins.includes(origin) ||
         origin.endsWith(".vercel.app") ||
-        origin.endsWith(".trycloudflare.com")
+        origin.endsWith(".trycloudflare.com") ||
+        origin.endsWith(".onrender.com")
       ) {
         callback(null, true);
         return;
