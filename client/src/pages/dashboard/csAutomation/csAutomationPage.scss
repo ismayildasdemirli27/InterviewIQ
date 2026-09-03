@@ -218,8 +218,12 @@
 
     .topics-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
 
       .topic-card {
         background: #ffffff;
@@ -309,8 +313,12 @@
 
     .config-dual-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       gap: 20px;
+
+      @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+      }
 
       .config-card {
         background: #ffffff;
@@ -442,6 +450,10 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
 
+            @media (max-width: 500px) {
+              grid-template-columns: repeat(2, 1fr);
+            }
+
             .diff-pill {
               padding: 8px;
               border-radius: 8px;
@@ -487,6 +499,14 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 16px;
         margin-top: 14px;
+
+        @media (max-width: 1024px) {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 600px) {
+          grid-template-columns: 1fr;
+        }
 
         .persona-card {
           background: #ffffff;
@@ -582,6 +602,10 @@
         gap: 16px;
         margin-top: 14px;
 
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+
         .protocol-box {
           display: flex;
           align-items: flex-start;
@@ -663,6 +687,18 @@
       align-items: center;
       gap: 20px;
       box-shadow: 0 16px 36px -8px rgba(30, 27, 75, 0.35);
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px;
+        gap: 16px;
+
+        .start-session-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
 
       .banner-details {
         h4 {
@@ -1830,6 +1866,14 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
 
+      @media (max-width: 1024px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (max-width: 550px) {
+        grid-template-columns: 1fr;
+      }
+
       .matrix-metric-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -1894,6 +1938,18 @@
       display: flex;
       align-items: center;
       gap: 18px;
+      flex-wrap: wrap;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+
+        .rec-cta-btn {
+          width: 100%;
+          text-align: center;
+        }
+      }
 
       .rec-icon {
         width: 44px;
@@ -2243,8 +2299,12 @@
 
     .history-cards-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
 
       .history-card {
         background: #ffffff;
