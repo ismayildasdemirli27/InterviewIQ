@@ -507,6 +507,13 @@ const LoginPage = () => {
 
         <section className="auth-form-side">
           <div className="auth-form-wrapper">
+            <Link
+              to="/"
+              className="mobile-auth-brand"
+            >
+              InterviewIQ
+              <span>AI</span>
+            </Link>
 
             {authView ===
               "login" && (

@@ -665,7 +665,19 @@
   }
 
   .mobile-auth-brand {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 22px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+
+    span {
+      color: #818cf8;
+      font-weight: 800;
+    }
   }
 
   .auth-heading {
