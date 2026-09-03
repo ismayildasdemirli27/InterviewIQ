@@ -27,13 +27,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       : "javascript";
 
   return (
-    <div className="monaco-editor-container" style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid #334155" }}>
+    <div className="monaco-editor-container" style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid #334155", width: "100%", maxWidth: "100%" }}>
       <div
         className="editor-toolbar"
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "8px",
           padding: "8px 14px",
           backgroundColor: "#1e293b",
           borderBottom: "1px solid #334155",
