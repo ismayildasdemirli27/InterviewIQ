@@ -267,6 +267,7 @@ const CsAutomationPage: React.FC = () => {
   const [showEvaluationModal, setShowEvaluationModal] = useState<boolean>(false);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [evalProgressText, setEvalProgressText] = useState<string>("Analyzing Code with AI...");
+  const [submitWarning, setSubmitWarning] = useState<string | null>(null);
 
   // Monaco, Whiteboard, Memory Visualizer & In-Browser Test Runner State
   const [editorMode, setEditorMode] = useState<"monaco" | "whiteboard" | "visualizer" | "text">("monaco");
@@ -583,7 +584,10 @@ const CsAutomationPage: React.FC = () => {
         setSession(newSession);
         setCurrentQuestionIndex(0);
         const firstQ = newSession.questions?.[0] || newSession.currentQuestion;
-        setUserAnswer(firstQ?.codeSnippet || "");
+        const defaultBoilerplate = firstQ?.codeSnippet?.trim()
+          ? firstQ.codeSnippet
+          : `/*\n * Problem: ${firstQ?.title || "Həll"}\n * Zəhmət olmasa izahınızı və ya həll kodunuzu bura qeyd edin:\n */\n`;
+        setUserAnswer(defaultBoilerplate);
         setUserTimeComplexity(firstQ?.expectedComplexity?.time || "O(n)");
         setUserSpaceComplexity(firstQ?.expectedComplexity?.space || "O(1)");
         setUnlockedHints([]);
@@ -591,8 +595,15 @@ const CsAutomationPage: React.FC = () => {
         setIsTimerRunning(true);
         setLastEvaluation(null);
         setShowEvaluationModal(false);
+        setSubmitWarning(null);
         setTestResults(null);
         setActiveTestTab(0);
+
+        if (window.innerWidth <= 768 || firstQ?.language === "text") {
+          setEditorMode("text");
+        } else {
+          setEditorMode("monaco");
+        }
 
         if (isPressureMode) {
           setPressureSecondsLeft(25 * 60);
@@ -643,12 +654,19 @@ const CsAutomationPage: React.FC = () => {
   ========================================= */
 
   const handleSubmitAnswer = async () => {
-    if (!session) return;
+    if (!session) {
+      setSubmitWarning("Aktiv sessiya tapılmadı. Zəhmət olmasa sessiyanı başladın.");
+      return;
+    }
     if (!userAnswer.trim()) {
-      alert("Please write your code or explanation before submitting.");
+      setSubmitWarning("⚠️ Zəhmət olmasa kod redaktoruna həllinizi və ya izahınızı daxil edin. Boş cavab qiymətləndirilə bilməz.");
+      if (window.innerWidth <= 768) {
+        setEditorMode("text");
+      }
       return;
     }
 
+    setSubmitWarning(null);
     setIsEvaluating(true);
     setIsTimerRunning(false);
     setErrorMessage(null);
@@ -692,7 +710,9 @@ const CsAutomationPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Submit answer error:", err);
-      setErrorMessage(err.response?.data?.message || "Evaluation failed. Please try again.");
+      const msg = err.response?.data?.message || "Evaluation failed. Please try again.";
+      setErrorMessage(msg);
+      setSubmitWarning(msg);
       setIsTimerRunning(true);
     } finally {
       clearInterval(progressTimer);
@@ -706,13 +726,17 @@ const CsAutomationPage: React.FC = () => {
     if (nextIdx < session.questions.length) {
       setCurrentQuestionIndex(nextIdx);
       const nextQ = session.questions[nextIdx];
-      setUserAnswer(nextQ?.codeSnippet || "");
+      const defaultBoilerplate = nextQ?.codeSnippet?.trim()
+        ? nextQ.codeSnippet
+        : `/*\n * Problem: ${nextQ?.title || "Həll"}\n * Zəhmət olmasa izahınızı və ya həll kodunuzu bura qeyd edin:\n */\n`;
+      setUserAnswer(defaultBoilerplate);
       setUserTimeComplexity(nextQ?.expectedComplexity?.time || "O(n)");
       setUserSpaceComplexity(nextQ?.expectedComplexity?.space || "O(1)");
       setUnlockedHints([]);
       setTimerSeconds(0);
       setIsTimerRunning(true);
       setShowEvaluationModal(false);
+      setSubmitWarning(null);
       setLastEvaluation(null);
       setTestResults(null);
       setActiveTestTab(0);
@@ -720,6 +744,10 @@ const CsAutomationPage: React.FC = () => {
       setIsSpeaking(false);
       if (speechRecognizerRef.current) speechRecognizerRef.current.stop();
       setIsListening(false);
+
+      if (window.innerWidth <= 768 || nextQ?.language === "text") {
+        setEditorMode("text");
+      }
     } else {
       setShowEvaluationModal(false);
     }
@@ -1744,6 +1772,55 @@ const CsAutomationPage: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Inline Submit Warning & Quick Starter Helper */}
+                    {submitWarning && (
+                      <div
+                        className="submit-warning-banner"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          background: "#fffbeb",
+                          border: "1.5px solid #fde68a",
+                          borderRadius: "10px",
+                          padding: "10px 14px",
+                          color: "#92400e",
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                          gap: "10px",
+                          marginTop: "8px",
+                          marginBottom: "4px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <FiAlertCircle style={{ color: "#d97706", fontSize: "1.2rem", flexShrink: 0 }} />
+                          <span>{submitWarning}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const starter = `// Problem: ${currentQ?.title || "Həll"}\n// İzah və ya kod nümunəsi:\nfunction solve() {\n  return true;\n}`;
+                            setUserAnswer(starter);
+                            setSubmitWarning(null);
+                          }}
+                          style={{
+                            background: "#d97706",
+                            color: "#ffffff",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "5px 12px",
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Nümunə Kod Əlavə Et
+                        </button>
+                      </div>
+                    )}
+
                     {/* Submit Bar */}
                     <div className="editor-footer">
                       <div className="footer-left">
@@ -1754,7 +1831,7 @@ const CsAutomationPage: React.FC = () => {
                         type="button"
                         className="submit-eval-btn"
                         onClick={handleSubmitAnswer}
-                        disabled={isEvaluating || !userAnswer.trim()}
+                        disabled={isEvaluating}
                       >
                         {isEvaluating ? (
                           <>

@@ -316,7 +316,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "intermediate",
       questionText:
         "Explain what a Deadlock is in multi-threaded/multi-process operating systems.\n\n1. Detail the **four Coffman conditions** that must simultaneously hold for a deadlock to occur.\n2. Describe how eliminating at least one of these conditions prevents deadlocks in practice.\n3. Briefly explain the **Banker's Algorithm** for deadlock avoidance.",
-      codeSnippet: "",
+      codeSnippet: `/* \n * Deadlock Şərtləri və Aradan Qaldırılması\n *\n * 1. 4 Coffman şərti:\n * - Mutual Exclusion:\n * - Hold and Wait:\n * - No Preemption:\n * - Circular Wait:\n *\n * 2. Şərtlərin aradan qaldırılması metodları:\n *\n * 3. Banker's Algorithm izahı:\n */`,
       language: "text",
       expectedComplexity: { time: "N/A", space: "N/A" },
       keyConcepts: [
@@ -340,7 +340,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "advanced",
       questionText:
         "Describe the architectural workflow of **Virtual Memory** and **Paging** in modern operating systems.\n\nExplain:\n- How a virtual address is translated into a physical address using Page Tables and TLB (Translation Lookaside Buffer).\n- What happens during a **Page Fault** interrupt from the hardware to OS kernel.\n- Compare the **LRU** and **Clock (Second-Chance)** page replacement algorithms.",
-      codeSnippet: "",
+      codeSnippet: `/*\n * Virtual Yaddaş və Səhifələmə (Paging)\n *\n * 1. Ünvan çevrilməsi (TLB və Page Table):\n *\n * 2. Page Fault mexanizmi:\n *\n * 3. Səhifə əvəzetmə alqoritmləri (LRU vs Clock):\n */`,
       language: "text",
       expectedComplexity: { time: "N/A", space: "N/A" },
       keyConcepts: ["Virtual Address Translation", "TLB Hit/Miss", "Page Table", "Page Fault Handler", "Thrashing", "Page Replacement"],
@@ -359,7 +359,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "intermediate",
       questionText:
         "Explain how **B-Tree** and **B+ Tree** data structures are utilized in relational database management systems (RDBMS) for indexing.\n\n1. What is the structural difference between a standard B-Tree and a B+ Tree?\n2. Why do databases (like MySQL InnoDB and PostgreSQL) overwhelmingly prefer **B+ Trees** over binary search trees or regular B-Trees for disk-based storage?\n3. Explain the difference between a **Clustered Index** and a **Secondary (Non-Clustered) Index**.",
-      codeSnippet: "",
+      codeSnippet: `/*\n * B-Tree və B+ Tree İndeksləşdirmə\n *\n * 1. B-Tree və B+ Tree arasındakı struktur fərqi:\n *\n * 2. B+ Tree-nin disk əsaslı verilənlər bazalarında üstünlükləri:\n *\n * 3. Clustered vs Secondary Index:\n */`,
       language: "text",
       expectedComplexity: { time: "O(log n)", space: "O(n)" },
       keyConcepts: [
@@ -384,7 +384,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "advanced",
       questionText:
         "Design a scalable, distributed URL shortener service (like TinyURL or Bitly) handling 100M new URLs created per month and 10B redirection reads per month.\n\nCover:\n1. **API Endpoints**: `POST /api/v1/shorten` and `GET /{shortCode}`.\n2. **ID / Hash Generation**: Base62 encoding vs MD5/SHA-256 vs Pre-generated Unique ID Generator (Snowflake/Range Counter).\n3. **Database Schema & Storage Estimates** (Relational vs NoSQL Key-Value).\n4. **Caching Layer** (Redis cache-aside with 80/20 rule).\n5. **High Availability & Redirection Handling** (HTTP 301 Permanent vs 302/307 Temporary Redirect for analytics).",
-      codeSnippet: "",
+      codeSnippet: `/*\n * URL Qısaldıcı (TinyURL) Sistem Dizaynı\n *\n * 1. API Endpoints:\n *    - POST /api/v1/shorten\n *    - GET /{shortCode}\n *\n * 2. ID / Hash generasiyası (Base62 vs Snowflake):\n *\n * 3. Database sxemi və yaddaş tələbləri:\n *\n * 4. Keşləmə qatı (Redis 80/20 qaydası):\n *\n * 5. Yüksək əlçatanlıq və HTTP 301 vs 302:\n */`,
       language: "text",
       expectedComplexity: { time: "O(1) read/write", space: "Distributed" },
       keyConcepts: [
@@ -410,7 +410,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "intermediate",
       questionText:
         "Explain the fundamental mechanisms of the **Transmission Control Protocol (TCP)**:\n\n1. Walk through the **3-way handshake** (SYN, SYN-ACK, ACK) and explain why a 2-way handshake is insufficient.\n2. Explain the **4-way connection termination** (FIN, ACK, FIN, ACK) and the purpose of the `TIME_WAIT` state.\n3. Compare TCP and UDP in terms of reliability, ordering, header overhead, and ideal use cases.",
-      codeSnippet: "",
+      codeSnippet: `/*\n * TCP Əlaqə Mexanizmi və Müqayisə\n *\n * 1. TCP 3-Way Handshake (SYN, SYN-ACK, ACK):\n *\n * 2. TCP 4-Way Teardown və TIME_WAIT:\n *\n * 3. TCP və UDP müqayisəsi və tətbiq sahələri:\n */`,
       language: "text",
       expectedComplexity: { time: "N/A", space: "N/A" },
       keyConcepts: [
@@ -461,7 +461,7 @@ const CURATED_QUESTIONS: Record<string, Partial<ICsQuestionItem>[]> = {
       difficulty: "intermediate",
       questionText:
         "Explain the root causes, mechanics, and defensive measures for two major web security vulnerabilities:\n\n1. **SQL Injection (SQLi)**: How attacker inputs alter database queries, difference between in-band and blind SQLi, and how Parameterized Queries / Prepared Statements eliminate the vulnerability.\n2. **Cross-Site Scripting (XSS)**: Differentiate between Stored XSS, Reflected XSS, and DOM-based XSS, and explain modern defenses (Context-aware output encoding, Content Security Policy, and HTTP-only cookies).",
-      codeSnippet: "",
+      codeSnippet: `/*\n * Web Təhlükəsizliyi: SQL Injection & XSS\n *\n * 1. SQL Injection (mexanizm və Parametrləşdirilmiş sorğular):\n *\n * 2. XSS (Stored, Reflected, DOM) və müdafiə üsulları (CSP, HTTP-only):\n */`,
       language: "text",
       expectedComplexity: { time: "N/A", space: "N/A" },
       keyConcepts: [
