@@ -13,4 +13,8 @@ dist-ssr/
 .idea/
 .DS_Store
 *.log
+scratch_chrome/
+capture_*.js
+check_render.js
+test_cdp.js
 
