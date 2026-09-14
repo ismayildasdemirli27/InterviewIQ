@@ -16,7 +16,6 @@ import {
   FiRefreshCw,
   FiTarget,
   FiTrendingUp,
-  FiCpu,
 } from "react-icons/fi";
 
 import axios from "axios";
@@ -632,32 +631,6 @@ const DashboardHomePage = () => {
                 <span>
                   Practice a new AI
                   interview session.
-                </span>
-              </div>
-
-              <FiArrowRight className="quick-arrow" />
-            </button>
-
-            <button
-              type="button"
-              className="quick-action"
-              onClick={() =>
-                navigate(
-                  "/dashboard/cs-automation"
-                )
-              }
-            >
-              <div className="quick-action-icon" style={{ background: "linear-gradient(135deg, #ede9fe, #e0e7ff)", color: "#6366f1" }}>
-                <FiCpu />
-              </div>
-
-              <div>
-                <strong>
-                  CS Automation Lab
-                </strong>
-
-                <span>
-                  Automated DSA & Core CS Simulator.
                 </span>
               </div>
 

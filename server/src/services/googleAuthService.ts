@@ -9,14 +9,11 @@ export interface IGoogleUserPayload {
   emailVerified: boolean;
 }
 
+const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+
 export const verifyGoogleCredential = async (
   credential: string
 ): Promise<IGoogleUserPayload> => {
-  if (!env.GOOGLE_CLIENT_ID) {
-    throw new Error("GOOGLE_CLIENT_ID is not configured on the server");
-  }
-
-  const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
   const ticket = await googleClient.verifyIdToken({
     idToken: credential,
     audience: env.GOOGLE_CLIENT_ID,

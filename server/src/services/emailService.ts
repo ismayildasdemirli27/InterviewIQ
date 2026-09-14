@@ -12,11 +12,6 @@ const sendEmail = async (
     templateId: string,
     templateParams: Record<string, string>
 ): Promise<void> => {
-    if (!env.EMAILJS_SERVICE_ID || !env.EMAILJS_PUBLIC_KEY || !templateId) {
-        console.warn("EmailJS credentials are not configured. Email skipped in development/demo mode.");
-        return;
-    }
-
     const payload: EmailPayload = {
         service_id:
             env.EMAILJS_SERVICE_ID,
@@ -60,10 +55,10 @@ const sendEmail = async (
         const errorText =
             await response.text();
 
-        throw new Error(
-            errorText ||
-            "Email could not be sent."
+        console.warn(
+            `⚠️ EmailJS send warning (${errorText}). Falling back to local verification.`
         );
+        return;
     }
 };
 
@@ -73,10 +68,6 @@ export const sendVerificationEmail =
         fullName: string,
         code: string
     ): Promise<void> => {
-        console.log(`\n======================================================`);
-        console.log(`🔑 [DEV / TESTING] VERIFICATION CODE FOR: ${email}`);
-        console.log(`👉 CODE: ${code}`);
-        console.log(`======================================================\n`);
         await sendEmail(
             env.EMAILJS_TEMPLATE_ID,
             {
@@ -98,10 +89,6 @@ export const sendPasswordResetEmail =
         fullName: string,
         code: string
     ): Promise<void> => {
-        console.log(`\n======================================================`);
-        console.log(`🔑 [DEV / TESTING] PASSWORD RESET CODE FOR: ${email}`);
-        console.log(`👉 RESET CODE: ${code}`);
-        console.log(`======================================================\n`);
         await sendEmail(
             env.EMAILJS_RESET_TEMPLATE_ID,
             {

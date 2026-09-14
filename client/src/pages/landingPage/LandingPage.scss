@@ -1572,25 +1572,26 @@
   }
 
   .hero-visual {
-    min-height: 380px;
-    max-width: 100%;
-    overflow: hidden;
+    min-height: 420px;
   }
 
   .hero-image-wrapper {
-    width: min(340px, 86vw);
-    height: min(340px, 86vw);
+    width: clamp(310px, 88vw, 410px);
+
+    height: clamp(310px, 88vw, 410px);
   }
 
   .visual-orbit {
     &--one {
-      width: min(330px, 84vw);
-      height: min(330px, 84vw);
+      width: clamp(310px, 86vw, 400px);
+
+      height: clamp(310px, 86vw, 400px);
     }
 
     &--two {
-      width: min(370px, 94vw);
-      height: min(370px, 94vw);
+      width: clamp(360px, 100vw, 460px);
+
+      height: clamp(360px, 100vw, 460px);
     }
   }
 
@@ -1618,8 +1619,10 @@
 
   .product-strip-inner {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 18px;
+
+    gap: 20px;
+
+    padding: 22px;
 
     .strip-divider {
       display: none;
@@ -1627,13 +1630,15 @@
   }
 
   .landing-section {
-    padding: 70px 16px 0;
+    padding: 90px 18px 0;
   }
 
   .section-head {
     flex-direction: column;
+
     align-items: flex-start;
-    gap: 16px;
+
+    gap: 18px;
 
     h2 br {
       display: none;
@@ -1642,48 +1647,36 @@
 
   .features-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
   }
 
   .how-wrapper {
-    padding: 24px 18px;
+    padding: 30px 22px;
+
     border-radius: 18px;
   }
 
   .cta-card {
-    padding: 30px 20px;
+    padding: 35px 24px;
+
     flex-direction: column;
+
     align-items: flex-start;
-    gap: 20px;
   }
 
   .cta-button {
     width: 100%;
-    justify-content: center;
   }
 
   .landing-footer {
     flex-direction: column;
+
     gap: 18px;
+
     text-align: center;
-    padding: 40px 16px 28px;
   }
 }
 
-/* VERY SMALL MOBILE (320px - 480px) */
-@media (max-width: 768px) {
-  .landing-nav {
-    width: calc(100% - 24px);
-    top: 14px;
-    padding: 0 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .product-strip-inner {
-    grid-template-columns: 1fr !important;
-  }
-}
+/* VERY SMALL MOBILE */
 
 @media (max-width: 420px) {
   .landing-nav {
@@ -1693,29 +1686,27 @@
   }
 
   .hero-image-wrapper {
-    width: min(280px, 85vw);
-    height: min(280px, 85vw);
+    width: 330px;
+    height: 330px;
   }
 
   .hero-visual {
-    min-height: 320px;
+    min-height: 370px;
   }
 
   .floating-ui {
-    transform: scale(0.68);
+    transform: scale(0.7);
 
     &--score {
-      right: -10px;
-      top: 20px;
+      right: -28px;
     }
 
     &--feedback {
-      left: -10px;
-      bottom: 20px;
+      left: -28px;
     }
   }
 
   .hero-copy h1 {
-    font-size: clamp(2.3rem, 11vw, 3.2rem);
+    font-size: clamp(2.75rem, 13vw, 3.7rem);
   }
 }

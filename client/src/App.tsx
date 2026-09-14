@@ -15,10 +15,14 @@ import DashboardHomePage from "./pages/dashboard/dashboardHome/dashboardHomePage
 import MockInterviewPage from "./pages/dashboard/mockInterview/mockInterviewPage";
 import InterviewSessionPage from "./pages/dashboard/interviewSessionPage/InterviewSessionPage";
 import ResumeAnalysisPage from "./pages/dashboard/resumeAnalysisPage/resumeAnalysisPage";
-import HistoryPage from "./pages/dashboard/historyPage/historyPage";
+import JobsPage from "./pages/dashboard/jobsPage/jobsPage";
+import JobDetailsPage from "./pages/dashboard/jobDetailsPage/jobDetailsPage";
+import PerformanceProgressPage from "./pages/dashboard/performanceProgressPage/performanceProgressPage";
 import BookmarksPage from "./pages/dashboard/bookmarksPage/bookmarksPage";
 import SettingsPage from "./pages/dashboard/settingsPage/SettingsPage";
-import CsAutomationPage from "./pages/dashboard/csAutomation/CsAutomationPage";
+import CVOptimizerPage from "./pages/dashboard/cvOptimizerPage/cvOptimizerPage";
+import CareerAssistantPage from "./pages/dashboard/careerAssistantPage/careerAssistantPage";
+import CareerAutomationPage from "./pages/dashboard/careerAutomationPage/careerAutomationPage";
 
 import ProtectedRoute from "./components/protectedRoute";
 
@@ -27,97 +31,89 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={
-          <LandingPage />
-        }
+        element={<LandingPage />}
       />
 
       <Route
         path="/login"
-        element={
-          <LoginPage />
-        }
+        element={<LoginPage />}
       />
 
       <Route
         path="/register"
-        element={
-          <RegisterPage />
-        }
+        element={<RegisterPage />}
       />
 
       <Route
         path="/verify-email"
-        element={
-          <VerifyEmailPage />
-        }
+        element={<VerifyEmailPage />}
       />
 
       <Route
-        element={
-          <ProtectedRoute />
-        }
+        element={<ProtectedRoute />}
       >
         <Route
           path="/dashboard"
-          element={
-            <DashboardLayout />
-          }
+          element={<DashboardLayout />}
         >
           <Route
             index
-            element={
-              <DashboardHomePage />
-            }
+            element={<DashboardHomePage />}
           />
 
           <Route
             path="mock-interview"
-            element={
-              <MockInterviewPage />
-            }
+            element={<MockInterviewPage />}
           />
 
           <Route
             path="mock-interview/:interviewId"
-            element={
-              <InterviewSessionPage />
-            }
-          />
-
-          <Route
-            path="cs-automation"
-            element={
-              <CsAutomationPage />
-            }
+            element={<InterviewSessionPage />}
           />
 
           <Route
             path="resume-analysis"
-            element={
-              <ResumeAnalysisPage />
-            }
+            element={<ResumeAnalysisPage />}
           />
 
           <Route
-            path="history"
-            element={
-              <HistoryPage />
-            }
+            path="jobs"
+            element={<JobsPage />}
+          />
+
+          <Route
+            path="jobs/:jobId"
+            element={<JobDetailsPage />}
+          />
+
+          <Route
+            path="jobs/:jobId/improve-cv"
+            element={<CVOptimizerPage />}
+          />
+
+          <Route
+            path="performance-progress"
+            element={<PerformanceProgressPage />}
           />
 
           <Route
             path="bookmarks"
-            element={
-              <BookmarksPage />
-            }
+            element={<BookmarksPage />}
+          />
+
+          <Route
+            path="career-assistant"
+            element={<CareerAssistantPage />}
+          />
+
+          <Route
+            path="career-automation"
+            element={<CareerAutomationPage />}
           />
 
           <Route
             path="settings"
-            element={
-              <SettingsPage />
-            }
+            element={<SettingsPage />}
           />
         </Route>
       </Route>

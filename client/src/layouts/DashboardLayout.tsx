@@ -15,13 +15,15 @@ import {
   FiHome,
   FiBriefcase,
   FiFileText,
+  FiSearch,
   FiPieChart,
   FiBookmark,
+  FiMessageCircle,
+  FiZap,
   FiSettings,
   FiLogOut,
   FiMenu,
   FiX,
-  FiCpu,
 } from "react-icons/fi";
 
 import {
@@ -275,43 +277,6 @@ const DashboardLayout: React.FC = () => {
             </NavLink>
 
             <NavLink
-              to="/dashboard/cs-automation"
-              onClick={
-                closeMobileMenu
-              }
-              className={({
-                isActive,
-              }) =>
-                `nav-item ${
-                  isActive
-                    ? "active"
-                    : ""
-                }`
-              }
-            >
-              <FiCpu />
-
-              <span>
-                CS Automation
-              </span>
-
-              <span
-                style={{
-                  marginLeft: "auto",
-                  background: "linear-gradient(135deg, #6366f1, #ec4899)",
-                  color: "#ffffff",
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  padding: "2px 6px",
-                  borderRadius: "6px",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                AI
-              </span>
-            </NavLink>
-
-            <NavLink
               to="/dashboard/resume-analysis"
               onClick={
                 closeMobileMenu
@@ -334,7 +299,29 @@ const DashboardLayout: React.FC = () => {
             </NavLink>
 
             <NavLink
-              to="/dashboard/history"
+              to="/dashboard/jobs"
+              onClick={
+                closeMobileMenu
+              }
+              className={({
+                isActive,
+              }) =>
+                `nav-item ${
+                  isActive
+                    ? "active"
+                    : ""
+                }`
+              }
+            >
+              <FiSearch />
+
+              <span>
+                Job Matching
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/dashboard/performance-progress"
               onClick={
                 closeMobileMenu
               }
@@ -351,7 +338,7 @@ const DashboardLayout: React.FC = () => {
               <FiPieChart />
 
               <span>
-                History & Progress
+                Performance Progress
               </span>
             </NavLink>
 
@@ -374,6 +361,50 @@ const DashboardLayout: React.FC = () => {
 
               <span>
                 Bookmarks
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/dashboard/career-assistant"
+              onClick={
+                closeMobileMenu
+              }
+              className={({
+                isActive,
+              }) =>
+                `nav-item ${
+                  isActive
+                    ? "active"
+                    : ""
+                }`
+              }
+            >
+              <FiMessageCircle />
+
+              <span>
+                Career Assistant
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/dashboard/career-automation"
+              onClick={
+                closeMobileMenu
+              }
+              className={({
+                isActive,
+              }) =>
+                `nav-item ${
+                  isActive
+                    ? "active"
+                    : ""
+                }`
+              }
+            >
+              <FiZap />
+
+              <span>
+                Career Automation
               </span>
             </NavLink>
           </nav>

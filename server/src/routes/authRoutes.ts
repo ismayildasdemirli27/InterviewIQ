@@ -18,7 +18,6 @@ import {
 import {
   registerController,
   loginController,
-  demoLoginController,
   getProfileController,
   updateProfileController,
   googleAuthController,
@@ -74,11 +73,6 @@ routes.post(
   loginValidation,
   validateRequest,
   loginController
-);
-
-routes.post(
-  "/demo-login",
-  demoLoginController
 );
 
 routes.post(

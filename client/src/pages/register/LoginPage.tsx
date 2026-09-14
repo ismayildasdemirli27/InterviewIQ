@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -18,6 +19,11 @@ import {
   FiLock,
   FiMail,
 } from "react-icons/fi";
+
+import {
+  GoogleLogin,
+  type CredentialResponse,
+} from "@react-oauth/google";
 
 import axios from "axios";
 
@@ -53,6 +59,14 @@ type AuthView =
 const LoginPage = () => {
   const navigate = useNavigate();
 
+  const googleButtonRef =
+    useRef<HTMLDivElement>(null);
+
+  const [
+    googleButtonWidth,
+    setGoogleButtonWidth,
+  ] = useState(400);
+
   const [email, setEmail] =
     useState("");
 
@@ -72,6 +86,11 @@ const LoginPage = () => {
   const [
     loading,
     setLoading,
+  ] = useState(false);
+
+  const [
+    googleLoading,
+    setGoogleLoading,
   ] = useState(false);
 
   const [error, setError] =
@@ -132,6 +151,52 @@ const LoginPage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const updateGoogleButtonWidth =
+      () => {
+        if (
+          googleButtonRef.current
+        ) {
+          setGoogleButtonWidth(
+            Math.min(
+              400,
+              googleButtonRef.current
+                .offsetWidth
+            )
+          );
+        }
+      };
+
+    updateGoogleButtonWidth();
+
+    const resizeObserver =
+      new ResizeObserver(
+        updateGoogleButtonWidth
+      );
+
+    if (
+      googleButtonRef.current
+    ) {
+      resizeObserver.observe(
+        googleButtonRef.current
+      );
+    }
+
+    window.addEventListener(
+      "resize",
+      updateGoogleButtonWidth
+    );
+
+    return () => {
+      resizeObserver.disconnect();
+
+      window.removeEventListener(
+        "resize",
+        updateGoogleButtonWidth
+      );
+    };
+  }, []);
+
   const clearMessages = () => {
     setError("");
     setSuccess("");
@@ -169,28 +234,21 @@ const LoginPage = () => {
     );
   };
 
-  const handleDemoLogin = async () => {
+  const handleDemoLogin = () => {
     clearMessages();
-    setLoading(true);
-    try {
-      const response = await apiClient.post("/auth/demo-login");
-      completeAuthentication(response.data);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-        "Demo giriş xətası baş verdi. Zəhmət olmasa yenidən cəhd edin."
-      );
-    } finally {
-      setLoading(false);
-    }
+    const demoUser = {
+      id: "demo-user-001",
+      _id: "demo-user-001",
+      fullName: "Demo İstifadəçi",
+      email: "demo@interviewiq.ai",
+      role: "user",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=DemoUser",
+      authProvider: "local" as const,
+    };
+    saveAuthSession("demo-token-for-preview-testing", demoUser);
+    localStorage.removeItem("interviewiq_pending_verification_email");
+    navigate("/dashboard", { replace: true });
   };
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("guest") === "true" || params.get("demo") === "true" || params.get("auto") === "true") {
-      void handleDemoLogin();
-    }
-  }, []);
 
   const handleSubmit =
     async (
@@ -271,7 +329,7 @@ const LoginPage = () => {
           setError(
             err.response?.data
               ?.message ||
-              "Unable to log in. Please try again."
+              "Backend API serveri qoşulu deyil. Canlı test üçün '⚡ Demo Hesabla Daxil Ol' düyməsindən istifadə edin."
           );
         } else if (
           err instanceof Error
@@ -281,11 +339,67 @@ const LoginPage = () => {
           );
         } else {
           setError(
-            "Unable to log in. Please try again."
+            "Giriş zamanı xəta baş verdi. Zəhmət olmasa '⚡ Demo Hesabla Daxil Ol' düyməsindən istifadə edin."
           );
         }
       } finally {
         setLoading(false);
+      }
+    };
+
+  const handleGoogleSuccess =
+    async (
+      credentialResponse:
+        CredentialResponse
+    ) => {
+      if (
+        !credentialResponse.credential
+      ) {
+        setError(
+          "Google did not return a valid credential."
+        );
+
+        return;
+      }
+
+      clearMessages();
+      setGoogleLoading(true);
+
+      try {
+        const response =
+          await apiClient.post(
+            "/auth/google",
+            {
+              credential:
+                credentialResponse.credential,
+            }
+          );
+
+        completeAuthentication(
+          response.data
+        );
+      } catch (err) {
+        if (
+          axios.isAxiosError(err)
+        ) {
+          setError(
+            err.response?.data
+              ?.message ||
+              "Google authentication failed."
+          );
+        } else if (
+          err instanceof Error
+        ) {
+          setError(
+            err.message
+          );
+        } else {
+          setError(
+            "Google authentication failed."
+          );
+        }
+      } finally {
+        setGoogleLoading(false);
       }
     };
 
@@ -507,13 +621,6 @@ const LoginPage = () => {
 
         <section className="auth-form-side">
           <div className="auth-form-wrapper">
-            <Link
-              to="/"
-              className="mobile-auth-brand"
-            >
-              InterviewIQ
-              <span>AI</span>
-            </Link>
 
             {authView ===
               "login" && (
@@ -543,7 +650,6 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={handleDemoLogin}
-                    disabled={loading}
                     style={{
                       width: "100%",
                       padding: "0.85rem 1.25rem",
@@ -551,7 +657,7 @@ const LoginPage = () => {
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "10px",
-                      fontWeight: 600,
+                      fontWeight: 700,
                       fontSize: "0.95rem",
                       cursor: "pointer",
                       display: "flex",
@@ -566,9 +672,44 @@ const LoginPage = () => {
                   </button>
                 </div>
 
+                <div className="google-auth-area">
+                  <div
+                    className="google-button-wrapper"
+                    ref={
+                      googleButtonRef
+                    }
+                  >
+                    <GoogleLogin
+                      onSuccess={
+                        handleGoogleSuccess
+                      }
+                      onError={() => {
+                        setError(
+                          "Google authentication failed."
+                        );
+                      }}
+                      type="standard"
+                      theme="outline"
+                      size="large"
+                      text="signin_with"
+                      shape="rectangular"
+                      width={
+                        googleButtonWidth
+                      }
+                    />
+                  </div>
+
+                  {googleLoading && (
+                    <span className="google-loading">
+                      Signing in with
+                      Google...
+                    </span>
+                  )}
+                </div>
+
                 <div className="auth-divider">
                   <span>
-                    və ya email ilə daxil olun
+                    or continue with email
                   </span>
                 </div>
 
@@ -696,7 +837,10 @@ const LoginPage = () => {
                   <button
                     type="submit"
                     className="auth-submit"
-                    disabled={loading}
+                    disabled={
+                      loading ||
+                      googleLoading
+                    }
                   >
                     {loading
                       ? "Logging in..."

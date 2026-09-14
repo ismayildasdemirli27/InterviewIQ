@@ -9,29 +9,69 @@ type NodeEnvironment =
 
 interface EnvConfig {
   PORT: number;
+
   NODE_ENV: NodeEnvironment;
+
   MONGO_URI: string;
+
   JWT_SECRET: string;
+
   JWT_EXPIRES_IN: string;
+
   GEMINI_API_KEY?: string;
+
   CLIENT_URL: string;
+
   GOOGLE_CLIENT_ID: string;
 
   EMAILJS_SERVICE_ID: string;
+
   EMAILJS_TEMPLATE_ID: string;
+
   EMAILJS_RESET_TEMPLATE_ID: string;
+
   EMAILJS_PUBLIC_KEY: string;
+
   EMAILJS_PRIVATE_KEY?: string;
+
+  /*
+   * Optional custom ATS boards.
+   *
+   * Comma-separated slugs.
+   *
+   * Example:
+   *
+   * GREENHOUSE_BOARDS=stripe,airbnb
+   * LEVER_BOARDS=whoop,veeva
+   * ASHBY_BOARDS=linear,ramp
+   *
+   * If these are empty, InterviewIQ uses its built-in
+   * default board list.
+   */
+  GREENHOUSE_BOARDS?: string;
+
+  LEVER_BOARDS?: string;
+
+  ASHBY_BOARDS?: string;
 }
 
+/* =========================================================
+   HELPERS
+========================================================= */
+
 function getRequiredEnv(
-  name: string
+  name:
+    string
 ): string {
-  const value = process.env[name];
+  const value =
+    process.env[
+      name
+    ];
 
   if (
     !value ||
-    value.trim() === ""
+    value.trim() ===
+      ""
   ) {
     throw new Error(
       `CRITICAL ERROR: Environment variable "${name}" is missing or empty in .env file.`
@@ -41,24 +81,50 @@ function getRequiredEnv(
   return value.trim();
 }
 
+function getOptionalEnv(
+  name:
+    string
+): string | undefined {
+  const value =
+    process.env[
+      name
+    ]
+      ?.trim();
+
+  return (
+    value ||
+    undefined
+  );
+}
+
 function parsePort(
-  value: string | undefined
+  value:
+    string | undefined
 ): number {
   if (
     !value ||
-    value.trim() === ""
+    value.trim() ===
+      ""
   ) {
     return 5000;
   }
 
   const parsedPort =
-    Number(value);
+    Number(
+      value
+    );
 
   if (
-    Number.isNaN(parsedPort) ||
-    !Number.isInteger(parsedPort) ||
-    parsedPort <= 0 ||
-    parsedPort > 65535
+    Number.isNaN(
+      parsedPort
+    ) ||
+    !Number.isInteger(
+      parsedPort
+    ) ||
+    parsedPort <=
+      0 ||
+    parsedPort >
+      65535
   ) {
     throw new Error(
       `CRITICAL ERROR: Invalid PORT value "${value}". PORT must be an integer between 1 and 65535.`
@@ -69,14 +135,15 @@ function parsePort(
 }
 
 function parseNodeEnvironment(
-  value: string | undefined
+  value:
+    string | undefined
 ): NodeEnvironment {
   const nodeEnv =
     value?.trim() ||
     "development";
 
-  const allowedEnvironments: NodeEnvironment[] =
-    [
+  const allowedEnvironments:
+    NodeEnvironment[] = [
       "development",
       "test",
       "production",
@@ -95,10 +162,16 @@ function parseNodeEnvironment(
   return nodeEnv as NodeEnvironment;
 }
 
-export const env: EnvConfig = {
-  PORT: parsePort(
-    process.env.PORT
-  ),
+/* =========================================================
+   CONFIG
+========================================================= */
+
+export const env:
+  EnvConfig = {
+  PORT:
+    parsePort(
+      process.env.PORT
+    ),
 
   NODE_ENV:
     parseNodeEnvironment(
@@ -106,41 +179,76 @@ export const env: EnvConfig = {
     ),
 
   MONGO_URI:
-    process.env.MONGO_URI?.trim() ||
-    "mongodb://127.0.0.1:27017/interviewiq",
+    getRequiredEnv(
+      "MONGO_URI"
+    ),
 
   JWT_SECRET:
-    process.env.JWT_SECRET?.trim() ||
-    "super_secret_interviewiq_jwt_token_key_2026",
+    getRequiredEnv(
+      "JWT_SECRET"
+    ),
 
   JWT_EXPIRES_IN:
-    process.env.JWT_EXPIRES_IN?.trim() ||
+    process
+      .env
+      .JWT_EXPIRES_IN
+      ?.trim() ||
     "7d",
 
   GEMINI_API_KEY:
-    process.env.GEMINI_API_KEY?.trim() ||
-    undefined,
+    getOptionalEnv(
+      "GEMINI_API_KEY"
+    ),
 
   CLIENT_URL:
-    process.env.CLIENT_URL?.trim() ||
+    process
+      .env
+      .CLIENT_URL
+      ?.trim() ||
     "http://localhost:5173",
 
   GOOGLE_CLIENT_ID:
-    process.env.GOOGLE_CLIENT_ID?.trim() || "",
+    getOptionalEnv(
+      "GOOGLE_CLIENT_ID"
+    ) || "dummy_google_client_id",
 
   EMAILJS_SERVICE_ID:
-    process.env.EMAILJS_SERVICE_ID?.trim() || "",
+    getOptionalEnv(
+      "EMAILJS_SERVICE_ID"
+    ) || "dummy_service_id",
 
   EMAILJS_TEMPLATE_ID:
-    process.env.EMAILJS_TEMPLATE_ID?.trim() || "",
+    getOptionalEnv(
+      "EMAILJS_TEMPLATE_ID"
+    ) || "dummy_template_id",
 
   EMAILJS_RESET_TEMPLATE_ID:
-    process.env.EMAILJS_RESET_TEMPLATE_ID?.trim() || "",
+    getOptionalEnv(
+      "EMAILJS_RESET_TEMPLATE_ID"
+    ) || "dummy_reset_template_id",
 
   EMAILJS_PUBLIC_KEY:
-    process.env.EMAILJS_PUBLIC_KEY?.trim() || "",
+    getOptionalEnv(
+      "EMAILJS_PUBLIC_KEY"
+    ) || "dummy_public_key",
 
   EMAILJS_PRIVATE_KEY:
-    process.env.EMAILJS_PRIVATE_KEY?.trim() ||
-    undefined,
+    getOptionalEnv(
+      "EMAILJS_PRIVATE_KEY"
+    ),
+
+  GREENHOUSE_BOARDS:
+    getOptionalEnv(
+      "GREENHOUSE_BOARDS"
+    ),
+
+  LEVER_BOARDS:
+    getOptionalEnv(
+      "LEVER_BOARDS"
+    ),
+
+  ASHBY_BOARDS:
+    getOptionalEnv(
+      "ASHBY_BOARDS"
+    ),
 };

@@ -1,12 +1,19 @@
-import path from "node:path";
-import fs from "node:fs";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 
-import { env } from "./config/env";
-import { globalLimiter } from "./middleware/rateLimitMiddleware";
-import { errorHandler, notFound } from "./middleware/errorMiddleware";
+import {
+  env,
+} from "./config/env";
+
+import {
+  globalLimiter,
+} from "./middleware/rateLimitMiddleware";
+
+import {
+  errorHandler,
+  notFound,
+} from "./middleware/errorMiddleware";
 
 import authRoutes from "./routes/authRoutes";
 import questionRoutes from "./routes/questionRoutes";
@@ -15,19 +22,32 @@ import dashboardRoutes from "./routes/dashboardRoutes";
 import progressRoutes from "./routes/progressRoutes";
 import resumeRoutes from "./routes/resumeRoutes";
 import bookmarkRoutes from "./routes/bookmarkRoutes";
-import csAutomationRoutes from "./routes/csAutomationRoutes";
-import healthController from "./controllers/healthController";
+import jobRoutes from "./routes/jobRoutes";
+import cvOptimizationRoutes from "./routes/cvOptimizationRoutes";
+import cvBuilderRoutes from "./routes/cvBuilderRoutes";
+import resumeProfileRoutes from "./routes/resumeProfileRoutes";
+import csRoutes from "./routes/csRoutes";
+import csLearningRoutes from "./routes/csLearningRoutes";
+import careerAutomationRoutes from "./routes/careerAutomationRoutes";
 
-const app = express();
+/* =========================================================
+   APP
+========================================================= */
 
-app.set("trust proxy", 1);
+const app =
+  express();
+
+/* =========================================================
+   SECURITY
+========================================================= */
 
 app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-  })
+  helmet()
 );
+
+/* =========================================================
+   CORS
+========================================================= */
 
 const allowedOrigins = [
   env.CLIENT_URL,
@@ -37,15 +57,21 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: (
+      origin,
+      callback
+    ) => {
       if (
         !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app") ||
-        origin.endsWith(".trycloudflare.com") ||
-        origin.endsWith(".onrender.com")
+        allowedOrigins.includes(
+          origin
+        )
       ) {
-        callback(null, true);
+        callback(
+          null,
+          true
+        );
+
         return;
       }
 
@@ -56,7 +82,8 @@ app.use(
       );
     },
 
-    credentials: true,
+    credentials:
+      true,
 
     methods: [
       "GET",
@@ -71,85 +98,192 @@ app.use(
       "Content-Type",
       "Authorization",
     ],
+
+    exposedHeaders: [
+      "Content-Disposition",
+      "X-Resume-Analysis-Id",
+      "X-CV-Baseline-Score",
+      "X-CV-Generated-Score",
+      "X-CV-Improvement",
+      "X-CV-Quality-Attempts",
+    ],
   })
 );
 
+/* =========================================================
+   BODY PARSERS
+========================================================= */
+
 app.use(
   express.json({
-    limit: "1mb",
+    limit:
+      "1mb",
   })
 );
 
 app.use(
   express.urlencoded({
-    extended: true,
-    limit: "1mb",
+    extended:
+      true,
+
+    limit:
+      "1mb",
   })
 );
 
-app.get("/health", healthController);
-app.get("/api/v1/health", healthController);
+/* =========================================================
+   GLOBAL API RATE LIMIT
+========================================================= */
 
 app.use(
   "/api/v1",
   globalLimiter
 );
 
+/* =========================================================
+   AUTH
+========================================================= */
+
 app.use(
   "/api/v1/auth",
   authRoutes
 );
 
-app.use(
-  "/api/v1/cs-automation",
-  csAutomationRoutes
-);
+/* =========================================================
+   QUESTION ROUTES
+========================================================= */
 
 app.use(
   "/api/v1",
   questionRoutes
 );
 
+/* =========================================================
+   INTERVIEW ROUTES
+========================================================= */
+
 app.use(
   "/api/v1",
   interviewRoutes
 );
+
+/* =========================================================
+   DASHBOARD ROUTES
+========================================================= */
 
 app.use(
   "/api/v1",
   dashboardRoutes
 );
 
+/* =========================================================
+   PROGRESS ROUTES
+========================================================= */
+
 app.use(
   "/api/v1",
   progressRoutes
 );
+
+/* =========================================================
+   RESUME ROUTES
+========================================================= */
 
 app.use(
   "/api/v1",
   resumeRoutes
 );
 
+/* =========================================================
+   BOOKMARK ROUTES
+========================================================= */
+
 app.use(
   "/api/v1",
   bookmarkRoutes
 );
 
-const clientDistPath = fs.existsSync(path.resolve(process.cwd(), "client/dist"))
-  ? path.resolve(process.cwd(), "client/dist")
-  : path.resolve(__dirname, "../../client/dist");
-if (fs.existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
-  app.use((req, res, next) => {
-    if (req.method === "GET" && !req.path.startsWith("/api/")) {
-      res.sendFile(path.join(clientDistPath, "index.html"));
-      return;
-    }
-    next();
-  });
-}
+/* =========================================================
+   JOB ROUTES
+========================================================= */
 
-app.use(notFound);
-app.use(errorHandler);
+app.use(
+  "/api/v1",
+  jobRoutes
+);
+
+/* =========================================================
+   CV OPTIMIZATION ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1",
+  cvOptimizationRoutes
+);
+
+/* =========================================================
+   CV BUILDER ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1",
+  cvBuilderRoutes
+);
+
+/* =========================================================
+   RESUME PROFILE ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1",
+  resumeProfileRoutes
+);
+
+/* =========================================================
+   CUSTOMER SERVICE ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1",
+  csRoutes
+);
+
+/* =========================================================
+   CUSTOMER SERVICE LEARNING ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1",
+  csLearningRoutes
+);
+
+/* =========================================================
+   CAREER AUTOMATION ROUTES
+========================================================= */
+
+app.use(
+  "/api/v1/",
+  careerAutomationRoutes
+);
+
+/* =========================================================
+   404 HANDLER
+========================================================= */
+
+app.use(
+  notFound
+);
+
+/* =========================================================
+   GLOBAL ERROR HANDLER
+========================================================= */
+
+app.use(
+  errorHandler
+);
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default app;
