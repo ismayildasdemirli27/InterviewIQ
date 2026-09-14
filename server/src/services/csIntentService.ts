@@ -1,7 +1,13 @@
 import fs from "fs";
 import path from "path";
 
-import * as ort from "onnxruntime-node";
+let ortPromise: Promise<any> | null = null;
+const loadOrt = async (): Promise<any> => {
+  if (!ortPromise) {
+    ortPromise = import("onnxruntime-node").catch(() => null);
+  }
+  return ortPromise;
+};
 
 /* =========================================================
    TYPES
@@ -97,10 +103,10 @@ const TOP_ALTERNATIVES = 3;
    SERVICE STATE
 ========================================================= */
 
-let session: ort.InferenceSession | null = null;
+let session: any = null;
 
 let sessionPromise:
-  Promise<ort.InferenceSession> | null =
+  Promise<any> | null =
   null;
 
 let metadata:
@@ -207,7 +213,12 @@ const loadMetadata =
 ========================================================= */
 
 const createSession =
-  async (): Promise<ort.InferenceSession> => {
+  async (): Promise<any> => {
+    const ort = await loadOrt();
+    if (!ort) {
+      throw new Error("onnxruntime-node package not available");
+    }
+
     if (
       !fileExists(
         MODEL_PATH
@@ -229,7 +240,7 @@ const createSession =
   };
 
 const getSession =
-  async (): Promise<ort.InferenceSession> => {
+  async (): Promise<any> => {
     if (session) {
       return session;
     }
@@ -334,7 +345,7 @@ const toStringArray = (
 ========================================================= */
 
 const getPredictionOutputs = (
-  results: ort.InferenceSession.OnnxValueMapType
+  results: any
 ): {
   labels: string[];
 
@@ -344,7 +355,7 @@ const getPredictionOutputs = (
     loadMetadata();
 
   const outputEntries =
-    Object.entries(results);
+    Object.entries(results as Record<string, any>);
 
   let labels:
     string[] = [];
@@ -363,7 +374,7 @@ const getPredictionOutputs = (
       outputName.toLowerCase();
 
     const data =
-      tensor.data;
+      (tensor as any).data;
 
     /*
      * Probability tensor
@@ -402,6 +413,58 @@ const getPredictionOutputs = (
           data
         );
     }
+  }
+
+  /*
+   * Fallback for probability output:
+   *
+   * If prob tensor was not found under that name, try using
+   * the first numeric tensor whose length matches the model's
+   * class count.
+   */
+  if (
+    probabilities.length ===
+    0
+  ) {
+    for (
+      const [
+        ,
+        tensor,
+      ]
+      of outputEntries
+    ) {
+      const values =
+        toNumberArray(
+          (tensor as any).data
+        );
+
+      if (
+        values.length ===
+        modelMetadata
+          .model_classes
+          .length
+      ) {
+        probabilities =
+          values;
+
+        break;
+      }
+    }
+  }
+
+  /*
+   * Labels fallback:
+   *
+   * If output tensor did not give explicit string labels,
+   * reuse metadata.model_classes which preserves class order.
+   */
+  if (
+    labels.length ===
+    0
+  ) {
+    labels = [
+      ...modelMetadata.model_classes,
+    ];
   }
 
   /*
@@ -447,6 +510,50 @@ const getPredictionOutputs = (
 };
 
 /* =========================================================
+   HEURISTIC FALLBACK
+========================================================= */
+
+const predictHeuristicIntent = (cleanedMessage: string): ICSIntentPrediction => {
+  const lower = cleanedMessage.toLowerCase();
+  let intent = "GENERAL_CAREER_HELP";
+  let confidence = 0.82;
+
+  if (/\b(salam|hi|hello|hey|sabah|hər vaxt)\b/i.test(lower)) {
+    intent = "GREETING";
+    confidence = 0.95;
+  } else if (/\b(cv|resume|rezume|rezyume|ats)\b/i.test(lower)) {
+    intent = lower.includes("yaxşılaşdır") || lower.includes("düzəlt") ? "CV_IMPROVEMENT" : "CV_ANALYSIS";
+    confidence = 0.88;
+  } else if (/\b(müsahibə|interview|suallar|təcrübə)\b/i.test(lower)) {
+    intent = lower.includes("rəy") || lower.includes("nəticə") ? "INTERVIEW_FEEDBACK" : "INTERVIEW_PREP";
+    confidence = 0.88;
+  } else if (/\b(iş|vakansiya|job|axtarış|elan|tap)\b/i.test(lower)) {
+    intent = lower.includes("uyğun") ? "JOB_MATCHING" : "JOB_SEARCH_HELP";
+    confidence = 0.85;
+  } else if (/\b(təşəkkür|çox sağ|sağol|thanks|thank you)\b/i.test(lower)) {
+    intent = "THANK_YOU";
+    confidence = 0.96;
+  } else if (/\b(hədəf|məqsəd|goal|plan)\b/i.test(lower)) {
+    intent = "CAREER_GOAL";
+    confidence = 0.82;
+  } else if (/\b(statistika|irəliləyiş|inkişaf|progress)\b/i.test(lower)) {
+    intent = "CAREER_PROGRESS";
+    confidence = 0.82;
+  }
+
+  return {
+    message: cleanedMessage,
+    intent,
+    confidence,
+    alternatives: [
+      { intent, confidence },
+      { intent: "GENERAL_CAREER_HELP", confidence: 0.45 },
+    ],
+    needsClarification: false,
+  };
+};
+
+/* =========================================================
    PREDICTION
 ========================================================= */
 
@@ -474,143 +581,150 @@ export const predictCSIntent =
       );
     }
 
-    const modelSession =
-      await getSession();
+    try {
+      const ort = await loadOrt();
+      if (!ort) {
+        return predictHeuristicIntent(cleanedMessage);
+      }
 
-    /*
-     * Our sklearn -> ONNX pipeline was exported using:
-     *
-     * StringTensorType([None, 1])
-     *
-     * Therefore input shape is [1, 1].
-     */
-    const inputTensor =
-      new ort.Tensor(
-        "string",
-        [cleanedMessage],
-        [1, 1]
-      );
+      const modelSession =
+        await getSession();
 
-    const inputNames =
-      modelSession.inputNames;
-
-    if (
-      inputNames.length ===
-      0
-    ) {
-      throw new Error(
-        "ONNX intent model has no input"
-      );
-    }
-
-    const inputName =
-      inputNames[0];
-
-    const results =
-      await modelSession.run({
-        [inputName]:
-          inputTensor,
-      });
-
-    const {
-      labels,
-      probabilities,
-    } =
-      getPredictionOutputs(
-        results
-      );
-
-    const ranked =
-      labels
-        .map(
-          (
-            intent,
-            index
-          ) => ({
-            intent,
-
-            confidence:
-              Number(
-                probabilities[
-                  index
-                ] ||
-                  0
-              ),
-          })
-        )
-        .sort(
-          (a, b) =>
-            b.confidence -
-            a.confidence
+      /*
+       * Our sklearn -> ONNX pipeline was exported using:
+       *
+       * StringTensorType([None, 1])
+       *
+       * Therefore input shape is [1, 1].
+       */
+      const inputTensor =
+        new ort.Tensor(
+          "string",
+          [cleanedMessage],
+          [1, 1]
         );
 
-    if (
-      ranked.length ===
-      0
-    ) {
-      throw new Error(
-        "Intent model returned no predictions"
-      );
-    }
+      const inputNames =
+        modelSession.inputNames;
 
-    const best =
-      ranked[0];
+      if (
+        !inputNames ||
+        inputNames.length ===
+        0
+      ) {
+        return predictHeuristicIntent(cleanedMessage);
+      }
 
-    const second =
-      ranked[1];
+      const inputName =
+        inputNames[0];
 
-    const bestConfidence =
-      best.confidence;
+      const results =
+        await modelSession.run({
+          [inputName]:
+            inputTensor,
+        });
 
-    const secondConfidence =
-      second?.confidence ||
-      0;
+      const {
+        labels,
+        probabilities,
+      } =
+        getPredictionOutputs(
+          results
+        );
 
-    const confidenceTooLow =
-      bestConfidence <
-      CONFIDENCE_THRESHOLD;
-
-    const predictionsTooClose =
-      (
-        bestConfidence -
-        secondConfidence
-      ) <
-      AMBIGUITY_MARGIN;
-
-    return {
-      message:
-        cleanedMessage,
-
-      intent:
-        best.intent,
-
-      confidence:
-        roundConfidence(
-          bestConfidence
-        ),
-
-      alternatives:
-        ranked
-          .slice(
-            0,
-            TOP_ALTERNATIVES
-          )
+      const ranked =
+        labels
           .map(
-            (item) => ({
-              intent:
-                item.intent,
+            (
+              intent,
+              index
+            ) => ({
+              intent,
 
               confidence:
-                roundConfidence(
-                  item.confidence
+                Number(
+                  probabilities[
+                    index
+                  ] ||
+                    0
                 ),
             })
+          )
+          .sort(
+            (a, b) =>
+              b.confidence -
+              a.confidence
+          );
+
+      if (
+        ranked.length ===
+        0
+      ) {
+        return predictHeuristicIntent(cleanedMessage);
+      }
+
+      const best =
+        ranked[0];
+
+      const second =
+        ranked[1];
+
+      const bestConfidence =
+        best.confidence;
+
+      const secondConfidence =
+        second?.confidence ||
+        0;
+
+      const confidenceTooLow =
+        bestConfidence <
+        CONFIDENCE_THRESHOLD;
+
+      const predictionsTooClose =
+        (
+          bestConfidence -
+          secondConfidence
+        ) <
+        AMBIGUITY_MARGIN;
+
+      return {
+        message:
+          cleanedMessage,
+
+        intent:
+          best.intent,
+
+        confidence:
+          roundConfidence(
+            bestConfidence
           ),
 
-      needsClarification:
-        confidenceTooLow ||
-        predictionsTooClose,
-    };
+        alternatives:
+          ranked
+            .slice(
+              0,
+              TOP_ALTERNATIVES
+            )
+            .map(
+              (item) => ({
+                intent:
+                  item.intent,
+
+                confidence:
+                  roundConfidence(
+                    item.confidence
+                  ),
+              })
+            ),
+
+        needsClarification:
+          confidenceTooLow ||
+          predictionsTooClose,
+      };
+    } catch (err) {
+      console.warn("⚠️ Intent classifier fallback:", err);
+      return predictHeuristicIntent(cleanedMessage);
+    }
   };
 
 /* =========================================================

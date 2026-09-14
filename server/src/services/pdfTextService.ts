@@ -1,10 +1,5 @@
-import {
-  PDFParse,
-} from "pdf-parse";
-
-import {
-  getDocument,
-} from "pdfjs-dist/legacy/build/pdf.mjs";
+// pdf-parse and pdfjs-dist are dynamically imported inside async extraction functions
+// to ensure zero boot overhead and avoid ESM/CJS require() issues in serverless runtimes.
 
 /*
  * pdfjs-dist exposes TextItem/TextMarkedContent in its declaration
@@ -30,12 +25,7 @@ interface IPdfJsTextItem {
   hasEOL?: boolean;
 }
 
-type PdfDocumentProxyLike =
-  Awaited<
-    ReturnType<
-      typeof getDocument
-    >["promise"]
-  >;
+type PdfDocumentProxyLike = any;
 
 /* =========================================================
    TYPES
@@ -2584,6 +2574,7 @@ const extractRawTextWithPdfParse =
     buffer:
       Buffer
   ): Promise<string> => {
+    const { PDFParse } = await import("pdf-parse");
     const parser =
       new PDFParse({
         data:
@@ -2622,6 +2613,9 @@ const extractLayoutAwareText =
     pages: IPdfPageLayout[];
     layout: PdfLayoutType;
   }> => {
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const getDocument = pdfjs.getDocument || (pdfjs as any).default?.getDocument;
+
     const loadingTask =
       getDocument({
         data:

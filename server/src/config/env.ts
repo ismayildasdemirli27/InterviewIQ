@@ -179,14 +179,10 @@ export const env:
     ),
 
   MONGO_URI:
-    getRequiredEnv(
-      "MONGO_URI"
-    ),
+    process.env.MONGO_URI?.trim() || "mongodb://127.0.0.1:27017/interviewiq",
 
   JWT_SECRET:
-    getRequiredEnv(
-      "JWT_SECRET"
-    ),
+    process.env.JWT_SECRET?.trim() || "super_secret_interviewiq_jwt_token_key_2026",
 
   JWT_EXPIRES_IN:
     process

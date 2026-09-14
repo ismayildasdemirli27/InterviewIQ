@@ -18,6 +18,11 @@ export const connectDB = async (): Promise<void> => {
       "⚠️ External MongoDB unreachable. Launching embedded in-memory database for testing..."
     );
 
+    if (process.env.VERCEL) {
+      console.warn("⚠️ Running in Vercel serverless mode. Skipping in-memory MongoDB spawn.");
+      return;
+    }
+
     try {
       if (!memoryServerInstance) {
         memoryServerInstance = await MongoMemoryServer.create();
@@ -34,6 +39,10 @@ export const connectDB = async (): Promise<void> => {
         "❌ Failed to start both standard and embedded MongoDB:",
         fallbackError
       );
+      if (process.env.VERCEL) {
+        console.warn("⚠️ Running in serverless mode without active MongoDB connection.");
+        return;
+      }
       throw error;
     }
   }

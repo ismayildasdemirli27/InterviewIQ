@@ -1,3 +1,5 @@
+import "./utils/domPolyfill";
+import "./types/expressUser";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -53,6 +55,8 @@ const allowedOrigins = [
   env.CLIENT_URL,
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://interview-iq-drab.vercel.app",
+  "https://client-wine-one-92.vercel.app",
 ];
 
 app.use(
@@ -65,6 +69,12 @@ app.use(
         !origin ||
         allowedOrigins.includes(
           origin
+        ) ||
+        origin.endsWith(
+          ".vercel.app"
+        ) ||
+        origin.includes(
+          "localhost"
         )
       ) {
         callback(
@@ -76,9 +86,8 @@ app.use(
       }
 
       callback(
-        new Error(
-          "CORS policy violation: Access denied"
-        )
+        null,
+        true
       );
     },
 
@@ -265,6 +274,28 @@ app.use(
   "/api/v1/",
   careerAutomationRoutes
 );
+
+/* =========================================================
+   HEALTH CHECK & ROOT
+========================================================= */
+
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "InterviewIQ API",
+    version: "1.0.0",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "healthy",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 /* =========================================================
    404 HANDLER

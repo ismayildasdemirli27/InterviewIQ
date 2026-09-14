@@ -4,7 +4,9 @@ import { handleMockFallback } from "./mockFallback";
 const apiClient = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000/api/v1",
+    (typeof window !== "undefined" && window.location.hostname !== "localhost"
+      ? "https://server-lime-eta.vercel.app/api/v1"
+      : "http://localhost:5000/api/v1"),
 });
 
 apiClient.interceptors.request.use(

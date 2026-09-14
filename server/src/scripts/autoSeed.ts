@@ -6,7 +6,14 @@ import { jobs } from "../data/jobs";
 import fs from "fs";
 import path from "path";
 
+import mongoose from "mongoose";
+
 export const autoSeed = async (): Promise<void> => {
+  if (mongoose.connection.readyState !== 1) {
+    console.log("ℹ️ MongoDB not connected. Skipping auto-seed.");
+    return;
+  }
+
   try {
     // 1. Seed Demo User
     let demoUser = await User.findOne({ email: "demo@interviewiq.ai" });
