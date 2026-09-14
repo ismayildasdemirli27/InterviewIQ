@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { env } from "./env";
 
+mongoose.set("bufferCommands", false);
+
 let memoryServerInstance: MongoMemoryServer | null = null;
 
 export const connectDB = async (): Promise<void> => {

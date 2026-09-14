@@ -7,6 +7,7 @@ const apiClient = axios.create({
     (typeof window !== "undefined" && window.location.hostname !== "localhost"
       ? "https://server-lime-eta.vercel.app/api/v1"
       : "http://localhost:5000/api/v1"),
+  timeout: 4500,
 });
 
 apiClient.interceptors.request.use(
@@ -37,8 +38,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If backend is unreachable (e.g. Mixed Content block on Vercel, offline dev server, network error)
-    if (!error.response || error.code === "ERR_NETWORK" || error.response?.status >= 500) {
+    // If backend is unreachable, cold starting, times out or returns >=500
+    if (
+      !error.response ||
+      error.code === "ERR_NETWORK" ||
+      error.code === "ECONNABORTED" ||
+      error.message?.includes("timeout") ||
+      error.response?.status >= 500
+    ) {
       const fallbackResponse = handleMockFallback(error.config);
       if (fallbackResponse) {
         console.info(

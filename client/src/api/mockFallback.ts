@@ -156,7 +156,7 @@ export const handleMockFallback = (
     });
   }
 
-  // 5. Jobs Listing
+  // 5. Jobs Listing & Single Job
   if (url.includes("/jobs")) {
     const mockJobsList = [
       {
@@ -271,6 +271,19 @@ export const handleMockFallback = (
       },
     ];
 
+    // Check if looking up a single job by id: /jobs/:jobId
+    const singleJobMatch = url.match(/\/jobs\/([a-zA-Z0-9_-]+)$/);
+    if (singleJobMatch && !["jobs", "refresh", "external"].includes(singleJobMatch[1])) {
+      const jobId = singleJobMatch[1];
+      const foundJob = mockJobsList.find((j) => j._id === jobId) || mockJobsList[0];
+      return makeResponse({
+        success: true,
+        data: {
+          job: foundJob,
+        },
+      });
+    }
+
     return makeResponse({
       success: true,
       hasResume: true,
@@ -279,6 +292,128 @@ export const handleMockFallback = (
         jobs: mockJobsList,
         total: mockJobsList.length,
       },
+    });
+  }
+
+  // 5.1 CV Optimization & Profile Completeness
+  if (url.includes("/cv-optimization")) {
+    return makeResponse({
+      success: true,
+      message: "CV optimizasiyası hazırlandı",
+      data: {
+        job: {
+          id: "job_fe_1",
+          title: "Senior Frontend Engineer (React/TypeScript)",
+          company: "InnovateTech Global",
+          location: "Baku, Azerbaijan (Hybrid)",
+          skills: ["React", "TypeScript", "JavaScript", "HTML/CSS", "Next.js", "TailwindCSS"],
+          keywords: ["frontend", "react", "typescript", "web", "ui"],
+        },
+        optimization: {
+          overallScore: 88,
+          baselineScore: 72,
+          targetScore: 94,
+          improvementScore: 16,
+          summary: "CV-niz vakansiyanın əsas tələblərinə yüksək səviyyədə uyğundur. React və TypeScript təcrübəniz ön plana çıxarılmışdır.",
+          sections: {
+            summary: {
+              status: "strong",
+              score: 90,
+              feedback: "Peşəkar xülasə aydın və hədəfə uyğundur.",
+              suggestions: ["Açar bacarıqları ilk iki cümlədə vurğulayın."],
+            },
+            skills: {
+              status: "strong",
+              score: 92,
+              feedback: "Tələb olunan bütün əsas texnologiyalar əhatə olunub.",
+              suggestions: ["Əlavə olaraq Next.js və Redux Toolkit qeyd edin."],
+            },
+            experience: {
+              status: "needs-improvement",
+              score: 82,
+              feedback: "Layihə nailiyyətlərini metriklərlə dəstəkləyin.",
+              suggestions: ["Sürət və performans artım faizlərini əlavə edin."],
+            },
+          },
+          keywords: {
+            matched: ["React", "TypeScript", "JavaScript", "HTML/CSS", "Frontend"],
+            missing: ["GraphQL", "CI/CD"],
+          },
+          priorityActions: [
+            {
+              id: "act-1",
+              title: "Nailiyyətlərə metriklər əlavə edin",
+              description: "Yüklənmə sürətinin 40% optimallaşdırılması kimi rəqəmlər göstərin.",
+              priority: "high",
+              section: "experience",
+            },
+            {
+              id: "act-2",
+              title: "Next.js və SSR təcrübəsini vurğulayın",
+              description: "Müasir frontend arxitekturalarına bələd olduğunuzu göstərin.",
+              priority: "medium",
+              section: "skills",
+            }
+          ]
+        },
+        pdfUrl: "#",
+        downloadUrl: "#",
+      }
+    });
+  }
+
+  if (url.includes("/resume-profile") || url.includes("/resume/profile") || url.includes("/completeness")) {
+    return makeResponse({
+      success: true,
+      message: "Profil məlumatları uğurla yükləndi",
+      data: {
+        profileId: "profile_mock_001",
+        source: {
+          hasUploadedResume: true,
+          fileName: "Demo_CV.pdf",
+        },
+        completeness: {
+          isComplete: true,
+          canGenerateCV: true,
+          completionPercentage: 92,
+          missingRequiredFields: [],
+          missingOptionalFields: [],
+          allMissingFields: [],
+          existingFields: ["fullName", "email", "phone", "skills", "experience", "education"],
+        }
+      }
+    });
+  }
+
+  if (url.includes("/questions")) {
+    return makeResponse({
+      success: true,
+      data: {
+        questions: [
+          {
+            _id: "q_1",
+            category: "frontend-developer",
+            difficulty: "intermediate",
+            type: "technical",
+            questionText: "What is the Virtual DOM and how does React reconcile changes?",
+          },
+          {
+            _id: "q_2",
+            category: "frontend-developer",
+            difficulty: "intermediate",
+            type: "technical",
+            questionText: "Explain the difference between state and props in React components.",
+          },
+          {
+            _id: "q_3",
+            category: "frontend-developer",
+            difficulty: "advanced",
+            type: "behavioral",
+            questionText: "Tell me about a challenging technical trade-off you had to make in a web application.",
+          }
+        ],
+        total: 3
+      }
     });
   }
 
